@@ -1,5 +1,17 @@
 package main
 
+// Slot type
+type Slot int
+
+const (
+	// Undefined means the Slot is undefined, e.g. "Which slot is above the topmost slot?"
+	Undefined Slot = iota
+	// Empty means the Slot does not have a Peg
+	Empty
+	// Full means the Slot has a Peg
+	Full
+)
+
 // Result indicates the outcome of the game
 type Result int
 
@@ -13,7 +25,7 @@ const (
 type Direction pair
 
 // Directions.
-// The value of each Direction is a pair of numbers. 
+// The value of each Direction is a pair of numbers.
 // The first value in the pair represents how row-values change
 //   as we move in that direction.
 // The second value in the pair represents how column-values change
@@ -30,8 +42,8 @@ var (
 	NW Direction = Direction{-1, -1}
 	SW Direction = Direction{1, 0}
 	NE Direction = Direction{-1, 0}
-	E Direction = Direction{0, 1}
-	W Direction = Direction{0, -1}
+	E  Direction = Direction{0, 1}
+	W  Direction = Direction{0, -1}
 )
 
 // rows is the number of rows on board.
@@ -45,15 +57,15 @@ const slots = rows * (rows + 1) / 2
 // Board struct.
 type Board struct {
 	// This is a wasteful array: unused entries = rows * (rows - 1) / 2
-	a [rows][rows]bool
+	a [rows][rows]Slot
 }
 
-func (b *Board) fillSlot(loc int, peg bool) {
+func (b *Board) fillSlot(loc int, peg Slot) {
 	row, col := locToIndexes(loc)
 	b.a[row][col] = peg
 }
 
-func (b Board) getSlot(loc int) bool {
+func (b Board) getSlot(loc int) Slot {
 	row, col := locToIndexes(loc)
 	return b.a[row][col]
 }
@@ -69,11 +81,20 @@ func locToIndexes(loc int) (int, int) {
 	return row, col
 }
 
+func indexesToLoc(row int, col int) int {
+	return row*(row+1)/2 + col + 1
+}
+
 // NewBoard creates a new Board.
 func NewBoard(pegs ...int) Board {
 	b := Board{}
 	for _, i := range pegs {
-		b.fillSlot(i, true)
+		b.fillSlot(i, Full)
+	}
+	for i := 1; i <= slots; i++ {
+		if b.getSlot(i) != Full {
+			b.fillSlot(i, Empty)
+		}
 	}
 	return b
 }
@@ -92,7 +113,7 @@ func GameOver(b Board) Result {
 func pegCount(b Board) int {
 	count := 0
 	for i := 1; i <= slots; i++ {
-		if b.getSlot(i) {
+		if b.getSlot(i) == Full {
 			count = count + 1
 		}
 	}
@@ -100,9 +121,37 @@ func pegCount(b Board) int {
 }
 
 func moveExists(b Board) bool {
-	return false
+	// for each empty peg
+	//   check if there are two pegs in any consecutive direction
+	//   if yes, return true
+	//   if no for all empty pegs, return false
+	retVal := false
+	for i := 1; i <= slots && !retVal; i++ {
+		if b.getSlot(i) == Empty {
+			one, two := getTwoAdjacentSlots(b, i, NE)
+			if one == Full && two == Full {
+				retVal = true
+			}
+		}
+	}
+	return retVal
 }
 
+// getTwoAdjacentSlots returns the two adjacent pegs in the given direction
+func getTwoAdjacentSlots(b Board, loc int, dir Direction) (Slot, Slot) {
+	i, j := locToIndexes(loc)
+	nOneX, nOneY := i+dir.row, j+dir.col
+	if nOneX < 0 || nOneY < 0 || nOneX >= rows || nOneY >= rows {
+		return Undefined, Undefined
+	}
+	neighborOne := b.getSlot(indexesToLoc(nOneX, nOneY))
+	nTwoX, nTwoY := nOneX+dir.row, nOneY+dir.col
+	if nTwoX < 0 || nTwoY < 0 || nTwoX >= rows || nTwoY >= rows {
+		return neighborOne, Undefined
+	}
+	neighborTwo := b.getSlot(indexesToLoc(nTwoX, nTwoY))
+	return neighborOne, neighborTwo
+}
 
 func adjacentSlots(b Board, d Direction) (int, int) {
 	return 2, 4

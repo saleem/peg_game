@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestUnitPlayerWinsWhenThereIsOnePegLeft(t *testing.T) {
@@ -15,6 +15,11 @@ func TestUnitPlayerWinsWhenThereIsOnePegLeft(t *testing.T) {
 func TestUnitPlayerLosesWhenThereAreTwoDistantPegsLeft(t *testing.T) {
 	b := NewBoard(1, 4)
 	assert.Equal(t, Lost, GameOver(b))
+}
+
+func TestUnitGameIsInProgressWhenThereAreTwoAdjacentPegsLeft(t *testing.T) {
+	b := NewBoard(1, 2)
+	assert.Equal(t, InProgress, GameOver(b))
 }
 
 func TestLocToRowCol(t *testing.T) {
@@ -49,4 +54,3 @@ func TestUnitAdjacentSlots(t *testing.T) {
 	assert.Equal(t, 2, i)
 	assert.Equal(t, 4, j)
 }
-
