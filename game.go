@@ -24,7 +24,7 @@ const (
 // Direction type.
 type Direction pair
 
-// Directions.
+// Directions map.
 // The value of each Direction is a pair of numbers.
 // The first value in the pair represents how row-values change
 //   as we move in that direction.
@@ -37,14 +37,14 @@ type Direction pair
 //   NE - Northeast (row-values decrease)
 //   E  - East (column-values increase)
 //   W  - West (column-values decrease)
-var (
-	SE Direction = Direction{1, 1}
-	NW Direction = Direction{-1, -1}
-	SW Direction = Direction{1, 0}
-	NE Direction = Direction{-1, 0}
-	E  Direction = Direction{0, 1}
-	W  Direction = Direction{0, -1}
-)
+var Directions map[string]Direction = map[string]Direction{
+	"SE": {1, 1},
+	"NW": {-1, -1},
+	"SW": {1, 0},
+	"NE": {-1, 0},
+	"E":  {0, 1},
+	"W":  {0, -1},
+}
 
 // rows is the number of rows on board.
 // rows is hard-coded to 5 since our board-size is fixed.
@@ -99,8 +99,8 @@ func NewBoard(pegs ...int) Board {
 	return b
 }
 
-// GameOver function.
-func GameOver(b Board) Result {
+// GameStatus function.
+func GameStatus(b Board) Result {
 	if pegCount(b) == 1 {
 		return Won
 	} else if moveExists(b) {
@@ -128,9 +128,11 @@ func moveExists(b Board) bool {
 	retVal := false
 	for i := 1; i <= slots && !retVal; i++ {
 		if b.getSlot(i) == Empty {
-			one, two := getTwoAdjacentSlots(b, i, NE)
-			if one == Full && two == Full {
-				retVal = true
+			for _, dir := range Directions {
+				one, two := getTwoAdjacentSlots(b, i, dir)
+				if one == Full && two == Full {
+					retVal = true
+				}
 			}
 		}
 	}
@@ -151,10 +153,6 @@ func getTwoAdjacentSlots(b Board, loc int, dir Direction) (Slot, Slot) {
 	}
 	neighborTwo := b.getSlot(indexesToLoc(nTwoX, nTwoY))
 	return neighborOne, neighborTwo
-}
-
-func adjacentSlots(b Board, d Direction) (int, int) {
-	return 2, 4
 }
 
 type pair struct {
