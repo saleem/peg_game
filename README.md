@@ -54,8 +54,7 @@ x x x x x
 
 # How to run
 
-This is a monorepo. When you clone it, you'll get small codebases in multiple languages.
-
+Clone the repo. You can run unit tests by running `make go-test` in your shell.
 
 # References
 

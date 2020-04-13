@@ -32,3 +32,6 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: Unit Test
+      run: go test -timeout 10s -run ^TestUnit.*
