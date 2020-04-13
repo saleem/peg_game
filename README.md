@@ -1,3 +1,5 @@
+![](https://github.com/saleem/peg_game/workflows/peg_game/badge.svg)
+
 # Peg game 
 
 The peg game is a conceptually simple yet tactically intriguiing single-player board game. It was popularized by a restaurant chain. The board is in the shape of an equilateral triangle with 15 holes. At the start of the game, 14 holes are occuped by individual pegs, and one hole is empty. The locaton of this empty hole is arbitrary chosen by the game player, although the specific position greatly affects the strategy the player _should_ take to win the game
